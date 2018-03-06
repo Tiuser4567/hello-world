@@ -6,9 +6,56 @@
   <div id="app">{{ message }}</div>
   <div id="app-2">
     <span v-bind:title="message"> Hover your mouse over me for a
-      few seconds to see my dynamically bound title! </span>
+      few seconds to see my dynamically bound title! </span> <span v-once>This
+      will never change: {{ message }}</span>
+    <p>Using mustaches: {{ rawHtml }}</p>
+    <p v-bind:custom="isCustom ? 'custom': false">
+      Using v-html directive: <span v-html="rawHtml"></span>
+    </p>
+  </div>
+  <div id="app3">
+    <ol>
+      <!-- Create an instance of the todo-item component -->
+      <li is="todo-item"></li>
+    </ol>
   </div>
 
+  <div id="app4">
+    <p>Original message: "{{ message }}"</p>
+    <p>Computed reversed message: "{{ reversedMessage }}"</p>
+  </div>
+
+  <div id="app5">
+    <input type="checkbox" value="test" v-model="checked"> <input
+      type="checkbox" value="test2" v-model="checked"> <label
+      for="checkbox">{{ checked }}</label>
+
+    <p />
+    <select v-model="selected">
+      <option disabled value="">Please select one</option>
+      <option>A</option>
+      <option>B</option>
+      <option>C</option>
+    </select> <span>Selected: {{ selected }}</span>
+
+    <p />
+
+    <select v-model="selected">
+      <option v-for="option in options" value="option.value">
+        {{ option.text }}</option>
+    </select> <span>Selected: {{ selected }}</span>
+
+  </div>
+
+  <div id="app6">
+    <input v-model.lazy="msg"> {{msg}}
+  </div>
+
+  <div id="app7">
+    <table>
+      <tr is="my-row"  />
+    </table>
+  </div>
 
   <script type="text/javascript">
       var app = new Vue({
@@ -21,7 +68,74 @@
       var app2 = new Vue({
         el : '#app-2',
         data : {
-          message : 'You loaded this page on ' + new Date().toLocaleString()
+          message : 'You loaded this page on ' + new Date().toLocaleString(),
+          rawHtml : '<span style="color: red">This should be red.</span>',
+          isCustom : false
+        }
+      });
+
+      Vue.component('todo-item', {
+        template : '<a>This is a todo</a>'
+      });
+
+      var app3 = new Vue({
+        el : '#app3'
+      });
+
+      var app4 = new Vue({
+        el : '#app4',
+        data : {
+          message : 'Hello'
+        },
+        computed : {
+          // a computed getter
+          reversedMessage : function() {
+            // `this` points to the vm instance
+            return this.message.split('').reverse().join('')
+          }
+        }
+      });
+
+      var app5 = new Vue({
+        el : '#app5',
+        data : {
+          checked : [ 'test' ],
+          selected : [],
+          options : [ {
+            text : 'One',
+            value : 'A'
+          }, {
+            text : 'Two',
+            value : 'B'
+          }, {
+            text : 'Three',
+            value : 'C'
+          } ]
+        }
+      });
+
+      var app6 = new Vue({
+        el : '#app6',
+        data : {
+          msg : ""
+        }
+      });
+
+      Vue.component(
+              'my-row',
+              {
+                props : {
+                  'myMessage' : {
+                    default: 'testing'
+                  }
+                },
+                template : '<tr><td><input type="text" id="test" v-model="myMessage"/></td></tr>'
+              });
+
+      var app7 = new Vue({
+        el : '#app7',
+        data : {
+          myMessage : null
         }
       });
     </script>
