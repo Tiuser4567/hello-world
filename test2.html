@@ -1,0 +1,204 @@
+<html>
+<head>
+<script src="https://unpkg.com/vue"></script>
+</head>
+<body>
+  <div id="app">
+    <child>
+    <div slot="footer">Footer</div>
+    <template slot-scope="lala">
+    <div>hello {{lala.message}}</div>
+    <div>world</div>
+    </template>
+    <div slot="header">Header</div>
+    </child>
+  </div>
+
+  <div id="tabs">
+    <component v-bind:is="currentView" v-bind:cdata="cdata">
+    <div>Hello</div>
+    </component>
+    <button @click="view('home')">Home</button>
+    <button @click="view('posts')">Posts</button>
+    <button @click="view('archive')">Archive</button>
+  </div>
+
+  <div id="paradox">
+    <folder v-bind:item="root"> </folder>
+  </div>
+
+  <div id="transition">
+    <transition name="el-fade" mode="out-in">
+    <table v-if="items.length > 0">
+      <tr v-for="item of items">
+        <td>{{item}}</td>
+      </tr>
+    </table>
+    <p v-else>Sorry, no items found.</p>
+    </transition>
+  </div>
+
+  <div id="list-complete-demo" class="demo">
+    <button v-on:click="shuffle">Shuffle</button>
+    <button v-on:click="add">Add</button>
+    <button v-on:click="remove">Remove</button>
+    <transition-group name="list-complete" tag="p"> <span
+      v-for="item in items" v-bind:key="item" class="list-complete-item">
+      {{ item }} </span> </transition-group>
+  </div>
+
+  <style type="text/css">
+.el-fade-enter-active {
+  transition: all .3s ease;
+}
+
+.el-fade-leave-active {
+  transition: all .8s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+}
+
+.el-fade-enter, .el-fade-leave-to
+  /* .slide-fade-leave-active below version 2.1.8 */ {
+  transform: translateX(10px);
+  opacity: 0;
+}
+
+.list-complete-item {
+  transition: all 1s;
+  display: inline-block;
+  margin-right: 10px;
+}
+
+.list-complete-enter, .list-complete-leave-to
+  /* .list-complete-leave-active below version 2.1.8 */ {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.list-complete-leave-active {
+  position: absolute;
+}
+</style>
+  <script type="text/javascript">
+      Vue
+          .component(
+              'child',
+              {
+                template : "<div><slot name='header'></slot><slot v-bind:message='message' /><slot name='footer'></slot></div>",
+                data : function() {
+                  return {
+                    message : 'my child message'
+                  }
+                }
+              });
+
+      var app = new Vue({
+        el : '#app',
+        data : {
+          message : 'Hello Vue!'
+        }
+      });
+
+      var vm = new Vue(
+          {
+            el : '#tabs',
+            data : {
+              currentView : 'home',
+              cdata : {
+                text : 'test'
+              }
+            },
+            components : {
+              home : {
+                props : {
+                  cdata : {
+                    type : Object
+                  }
+                },
+                template : '<div>Home <p/>{{ cdata.text }}<slot/> <input name="test" type="text"/></div>'
+              },
+              posts : {
+                template : '<div>Posts <p/><slot/> <input name="test" type="text"/></div>'
+              },
+              archive : {
+                template : '<div>Archive <p/><slot/> <input name="test" type="text"/></div>'
+              }
+            },
+            methods : {
+              view : function(v) {
+                this.currentView = v;
+              }
+            }
+          });
+
+      Vue.component("folder-item",{
+        props: ["children", "level"],
+        template : '<div><div>Folder Items:</div><div v-for="child of children"><div v-if="child.type === \'FLD\'"><folder v-bind:item="child" :level="level"/></div><div v-else>{{ child.name + " " + level  }} </div></div></div>'
+      });
+      
+      Vue.component("folder",{
+        props : {item:{}, level:{default: 1}},
+        data: function() {
+          return {};
+        },
+        template : '<div><div>Folder: {{ item.name }} - Level {{ level }} </div><div><folder-item v-bind:children="item.children" :level="level + 1"/></div></div>'
+      });
+      
+      
+      var app3 = new Vue(
+          {
+            el : '#paradox',
+            data : {
+              root : {
+                name : "Root Folder",
+                type : "FLD",
+                children : [ {
+                  name : "folder1",
+                  type : "FLD",
+                  children : [ {
+                    name : "folder1 child1"
+                  }, {
+                    name : "folder1 child2",
+                    type: "FLD",
+                    children: [{name: "folder 1 child2 file1"}]
+                  } ]
+                }, {
+                  name : "root file1"
+                } ]
+              }
+            },
+            components: {
+              'test-item': {template:'<span>test</span>'}
+            }
+          });
+      
+      var app4 = new Vue({
+        el: "#transition",
+        data: {
+          items: []
+        }
+      });
+      
+      var app5 = new Vue({
+        el: "#list-complete-demo",
+        data: {
+          items: [1,2,3,4,5,6,7,8,9],
+          nextNum: 10
+        },
+        methods: {
+          randomIndex: function () {
+            return Math.floor(Math.random() * this.items.length)
+          },
+          add: function () {
+            this.items.splice(this.randomIndex(), 0, this.nextNum++)
+          },
+          remove: function () {
+            this.items.splice(this.randomIndex(), 1)
+          },
+          shuffle: function () {
+            this.items = _.shuffle(this.items)
+          }
+        }
+      });
+    </script>
+</body>
+</html>
